@@ -28,14 +28,14 @@ public class AntennaThread extends Thread {
             while(true){
 
                changeAntenna(client,conn,ip,"00E9");
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 changeAntenna(client,conn,ip,"01E8");
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 changeAntenna(client,conn,ip,"02E7");
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 changeAntenna(client,conn,ip,"03E6");
 
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
 
 

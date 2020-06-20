@@ -92,7 +92,7 @@ public class DeviceApplication {
     public static synchronized  String getAntID(String str){
         String antid="";
         try{
-            antid=str.substring(4,6);
+            antid=str.substring(8,10);
 
         }catch (Exception ex){
             System.out.println(ex);
@@ -100,76 +100,9 @@ public class DeviceApplication {
         return antid;
     }
 
-    private static Runnable thread(String ip) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    try {
-                        Client conn=new Client();
-                        SocketClient client=new SocketClient();
-                        client.ClientOpen(ip);
-
-
-                            String str = "A0040189FFD3";
-                            byte[] message = hexStrToByteArray(str);
-                            client.sendMessage(message);
-                            String ans = byteArrayToHexStr(client.getMessage());
-
-                            if (!verify(ans)) {
-                                String epc=getEpc(ans);
-                                String antID=getAntID(ans);
-                                System.out.println(byteArrToBinStr(parseHexStr2Byte(antID)));
-                                conn.rfidScanOut(epc,"inside");
-                                System.out.println(epc);
-                            }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-    }
 
 
 
-
-    private static Runnable getThread(String ip) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Client conn=new Client();
-                    SocketClient client=new SocketClient();
-                    client.ClientOpen(ip);
-
-                    while(true) {
-
-                        String str = "A0040189FFD3";
-                        byte[] message = hexStrToByteArray(str);
-                        client.sendMessage(message);
-                        String ans = byteArrayToHexStr(client.getMessage());
-                        System.out.println(ip);
-
-                        if (!verify(ans)) {
-                            String epc=getEpc(ans);
-                            String antID=getAntID(ans);
-                            System.out.println(byteArrToBinStr(parseHexStr2Byte(antID)));
-                            conn.rfidScanOut(epc,"inside");
-                            System.out.println(epc);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-    }
 
     public static String SendGET(String url){
         String result="";//访问返回结果
@@ -228,7 +161,8 @@ public class DeviceApplication {
         return result;
     }
 
-    public static synchronized void performTask(SocketClient client,Client conn,String ip ) throws Exception{
+    public static synchronized void performTask(SocketClient client,Client conn,String ip,String remark ) throws Exception{
+
         String str = "A0040189FFD3";
         byte[] message = hexStrToByteArray(str);
         client.sendMessage(message);
@@ -240,9 +174,15 @@ public class DeviceApplication {
             String epc = getEpc(ans);
             String antID = getAntID(ans);
             System.out.println("线程"+ip+"在执行");
-            //System.out.println(byteArrToBinStr(parseHexStr2Byte(antID)));
-            String request=ip+antID+" "+epc;
-            conn.rfidScanOut(request, "inside");
+            System.out.println(byteArrToBinStr(parseHexStr2Byte(antID)));
+            String finalantid=byteArrToBinStr(parseHexStr2Byte(antID)).substring(6,8);
+
+            String request=ip+finalantid;
+            if (remark.equals("大门")) {
+                conn.rfidScanOut(epc);
+            }else if(remark.equals("工位")){
+                conn.rfid(request,epc);
+            }
             System.out.println(epc);
         }
     }
@@ -275,22 +215,33 @@ public class DeviceApplication {
 
 
         List<String> ipList=new ArrayList<>();
+        List<String> remarkList=new ArrayList<>();
+        List<Integer > idList=new ArrayList<>();
 
         for(int i=0;i<datas.length();i++){
             JSONObject detail= (JSONObject) datas.get(i);
             String ip=detail.get("addr").toString();
+            String remark=detail.get("remark").toString();
+            Integer id=Integer.parseInt(detail.get("id").toString());
             ipList.add(ip);
+            remarkList.add(remark);
+            idList.add(id);
         }
 
 
         System.out.println(ipList);
+        System.out.println(remarkList);
 
         for(int i=0;i<ipList.size();i++){
              String ip=ipList.get(i);
+            String remark=remarkList.get(i);
+            int id=idList.get(i);
+
             Client conn = new Client();
             SocketClient client = new SocketClient();
-            client.ClientOpen(ip);
-            Thread thread=new MyThread(ip,conn,client);
+            client.ClientOpen(ip,id);
+
+            Thread thread=new MyThread(ip,conn,client,remark);
             Thread thread1=new AntennaThread(ip,conn,client);
             thread.start();
             thread1.start();

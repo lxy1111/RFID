@@ -12,11 +12,13 @@ public class MyThread extends Thread{
     private String ip;
     private Client conn;
     private SocketClient client;
+    private String remark;
 
-   public MyThread(String ip,Client conn,SocketClient client) {
+   public MyThread(String ip,Client conn,SocketClient client,String remark) {
         this.ip = ip;
         this.conn=conn;
         this.client=client;
+        this.remark=remark;
 
    }
 
@@ -43,8 +45,8 @@ public class MyThread extends Thread{
 //                   conn.rfidScanOut(epc, "inside");
 //                   System.out.println(epc);
 //               }
-               performTask(client,conn,ip);
-               Thread.sleep(1000);
+               performTask(client,conn,ip,remark);
+               Thread.sleep(100);
            }
         } catch (Exception e) {
             e.printStackTrace();

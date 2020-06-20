@@ -12,12 +12,13 @@ public class SocketClient {
     public  Socket socket = null;
     public  OutputStream outputStream;
     public  InputStream inputStream;
-    private String URL="http://47.101.148.57:8886/api/equipment_status/";
+    private String URL="http://47.103.83.192:8886/api/system_rfid";
+    private int id;
 
 
 
 
-    public synchronized   void updateEquip(String url)  {
+    public synchronized   void updateEquip(String url,String ip,String status)  {
      try {
          URL postUrl = new URL(url);
          HttpURLConnection connection = (HttpURLConnection) postUrl.openConnection();
@@ -26,8 +27,16 @@ public class SocketClient {
          connection.setRequestMethod("PUT");
          connection.setUseCaches(false);
          connection.setInstanceFollowRedirects(true);
-         connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+         connection.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+         connection.setRequestProperty("accept", "application/json");
+         connection.setRequestProperty("status", status);
+
          connection.connect();
+         DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+         String content = "ip="+URLEncoder.encode(ip, "utf-8");
+         out.writeBytes(content);
+         out.flush();
+         out.close();
          BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "utf-8"));// 设置编码,否则中文乱码
          String line = "";
 
@@ -46,7 +55,7 @@ public class SocketClient {
     }
 
     // 要连接的服务端IP地址和端口
-    public synchronized void ClientOpen (String host,int port) throws Exception{
+    public synchronized void doClientOpen (String host,int port,int id) throws Exception{
 
         // 与服务端建立连接
 
@@ -60,22 +69,22 @@ public class SocketClient {
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            updateEquip(this.URL+"bad/"+host+"/update");
+            updateEquip(this.URL,host,"不可用");
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            updateEquip(this.URL+"bad/"+host+"/update");
+            updateEquip(this.URL,host,"不可用");
         }
         // 建立连接后获得输出流
         try {
             outputStream = socket.getOutputStream();
             inputStream = socket.getInputStream();
-            updateEquip(this.URL+"well/"+host+"/update");
+            updateEquip(this.URL,host,"可用");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            updateEquip(this.URL+"bad/"+host+"/update");
+            updateEquip(this.URL,host,"不可用");
 
         }
 
@@ -83,8 +92,8 @@ public class SocketClient {
     }
 
 
-    public synchronized  void ClientOpen (String ip) throws Exception {
-        ClientOpen(ip, 4001);
+    public synchronized  void ClientOpen (String ip,int id) throws Exception {
+        doClientOpen(ip, 4001,id);
     }
 
 
