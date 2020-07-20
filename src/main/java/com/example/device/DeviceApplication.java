@@ -161,30 +161,33 @@ public class DeviceApplication {
         return result;
     }
 
-    public static synchronized void performTask(SocketClient client,Client conn,String ip,String remark ) throws Exception{
+    public static synchronized void performTask(SocketClient client,Client conn,String ip,String remark ) {
+       try {
+           String str = "A0040189FFD3";
+           byte[] message = hexStrToByteArray(str);
+           client.sendMessage(message);
+           String ans = byteArrayToHexStr(client.getMessage());
+           System.out.println(ip);
+           System.out.println(ans);
 
-        String str = "A0040189FFD3";
-        byte[] message = hexStrToByteArray(str);
-        client.sendMessage(message);
-        String ans = byteArrayToHexStr(client.getMessage());
-        System.out.println(ip);
-        System.out.println(ans);
+           if (!verify(ans)) {
+               String epc = getEpc(ans);
+               String antID = getAntID(ans);
+               System.out.println("线程" + ip + "在执行");
+               System.out.println(byteArrToBinStr(parseHexStr2Byte(antID)));
+               String finalantid = byteArrToBinStr(parseHexStr2Byte(antID)).substring(6, 8);
 
-        if (!verify(ans)) {
-            String epc = getEpc(ans);
-            String antID = getAntID(ans);
-            System.out.println("线程"+ip+"在执行");
-            System.out.println(byteArrToBinStr(parseHexStr2Byte(antID)));
-            String finalantid=byteArrToBinStr(parseHexStr2Byte(antID)).substring(6,8);
-
-            String request=ip+finalantid;
-            if (remark.equals("大门")) {
-                conn.rfidScanOut(epc);
-            }else if(remark.equals("工位")){
-                conn.rfid(request,epc);
-            }
-            System.out.println(epc);
-        }
+               String request = ip + finalantid;
+               if (remark.equals("大门")) {
+                   conn.rfidScanOut(epc);
+               } else if (remark.equals("工位")) {
+                   conn.rfid(request, epc);
+               }
+               System.out.println(epc);
+           }
+       }catch (Exception ex){
+           System.out.println(ex);
+       }
     }
 
     public static synchronized void  changeAntenna(SocketClient client,Client conn,String ip ,String antenna) throws Exception{

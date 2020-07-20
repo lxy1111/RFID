@@ -46,7 +46,7 @@ public class MyThread extends Thread{
 //                   System.out.println(epc);
 //               }
                performTask(client,conn,ip,remark);
-               Thread.sleep(100);
+               Thread.sleep(10);
            }
         } catch (Exception e) {
             e.printStackTrace();

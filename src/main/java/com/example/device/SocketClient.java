@@ -71,7 +71,7 @@ public class SocketClient {
             e.printStackTrace();
             updateEquip(this.URL,host,"不可用");
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             updateEquip(this.URL,host,"不可用");
@@ -81,7 +81,7 @@ public class SocketClient {
             outputStream = socket.getOutputStream();
             inputStream = socket.getInputStream();
             updateEquip(this.URL,host,"可用");
-        } catch (IOException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             updateEquip(this.URL,host,"不可用");
